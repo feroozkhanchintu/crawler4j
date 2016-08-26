@@ -309,72 +309,53 @@ public final class UrlResolver {
       url.query_ = baseUrl.query_;
       return url;
     }
-    // Step 6: The last segment of the base URL's path (anything
-    //         following the rightmost slash "/", or the entire path if no
-    //         slash is present) is removed and the embedded URL's path is
-    //         appended in its place.  The following operations are
-    //         then applied, in order, to the new path:
-    final String basePath = baseUrl.path_;
-    String path = "";
-
-    if (basePath != null) {
-      final int lastSlashIndex = basePath.lastIndexOf('/');
-
-      if (lastSlashIndex >= 0) {
-        path = basePath.substring(0, lastSlashIndex + 1);
-      }
-    } else {
-      path = "/";
-    }
-    path = path.concat(url.path_);
-    //      a) All occurrences of "./", where "." is a complete path
-    //         segment, are removed.
-    int pathSegmentIndex;
-
-    while ((pathSegmentIndex = path.indexOf("/./")) >= 0) {
-      path = path.substring(0, pathSegmentIndex + 1).concat(path.substring(pathSegmentIndex + 3));
-    }
-    //      b) If the path ends with "." as a complete path segment,
-    //         that "." is removed.
-    if (path.endsWith("/.")) {
-      path = path.substring(0, path.length() - 1);
-    }
-    //      c) All occurrences of "<segment>/../", where <segment> is a
-    //         complete path segment not equal to "..", are removed.
-    //         Removal of these path segments is performed iteratively,
-    //         removing the leftmost matching pattern on each iteration,
-    //         until no matching pattern remains.
-    while ((pathSegmentIndex = path.indexOf("/../")) > 0) {
-      final String pathSegment = path.substring(0, pathSegmentIndex);
-      final int slashIndex = pathSegment.lastIndexOf('/');
-
-      if (slashIndex < 0) {
-        continue;
-      }
-      if (!"..".equals(pathSegment.substring(slashIndex))) {
-        path = path.substring(0, slashIndex + 1).concat(path.substring(pathSegmentIndex + 4));
-      }
-    }
-    //      d) If the path ends with "<segment>/..", where <segment> is a
-    //         complete path segment not equal to "..", that
-    //         "<segment>/.." is removed.
-    if (path.endsWith("/..")) {
-      final String pathSegment = path.substring(0, path.length() - 3);
-      final int slashIndex = pathSegment.lastIndexOf('/');
-
-      if (slashIndex >= 0) {
-        path = path.substring(0, slashIndex + 1);
-      }
-    }
-
-    path = removeLeadingSlashPoints(path);
-
-    url.path_ = path;
-    // Step 7: The resulting URL components, including any inherited from
+    String path = path123(baseUrl, url);
+	// Step 7: The resulting URL components, including any inherited from
     //         the base URL, are recombined to give the absolute form of
     //         the embedded URL.
     return url;
   }
+
+private static String path123(UrlResolver.Url baseUrl, UrlResolver.Url url) {
+	final String basePath = baseUrl.path_;
+	String path = "";
+	if (basePath != null) {
+		final int lastSlashIndex = basePath.lastIndexOf('/');
+		if (lastSlashIndex >= 0) {
+			path = basePath.substring(0, lastSlashIndex + 1);
+		}
+	} else {
+		path = "/";
+	}
+	path = path.concat(url.path_);
+	int pathSegmentIndex;
+	while ((pathSegmentIndex = path.indexOf("/./")) >= 0) {
+		path = path.substring(0, pathSegmentIndex + 1).concat(path.substring(pathSegmentIndex + 3));
+	}
+	if (path.endsWith("/.")) {
+		path = path.substring(0, path.length() - 1);
+	}
+	while ((pathSegmentIndex = path.indexOf("/../")) > 0) {
+		final String pathSegment = path.substring(0, pathSegmentIndex);
+		final int slashIndex = pathSegment.lastIndexOf('/');
+		if (slashIndex < 0) {
+			continue;
+		}
+		if (!"..".equals(pathSegment.substring(slashIndex))) {
+			path = path.substring(0, slashIndex + 1).concat(path.substring(pathSegmentIndex + 4));
+		}
+	}
+	if (path.endsWith("/..")) {
+		final String pathSegment = path.substring(0, path.length() - 3);
+		final int slashIndex = pathSegment.lastIndexOf('/');
+		if (slashIndex >= 0) {
+			path = path.substring(0, slashIndex + 1);
+		}
+	}
+	path = removeLeadingSlashPoints(path);
+	url.path_ = path;
+	return path;
+}
 
   /**
    * "/.." at the beginning should be removed as browsers do (not in RFC)
