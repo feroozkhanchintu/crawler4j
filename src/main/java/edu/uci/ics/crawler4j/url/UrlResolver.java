@@ -309,14 +309,14 @@ public final class UrlResolver {
       url.query_ = baseUrl.query_;
       return url;
     }
-    String path = path(baseUrl, url);
+    String path = path123(baseUrl, url);
 	// Step 7: The resulting URL components, including any inherited from
     //         the base URL, are recombined to give the absolute form of
     //         the embedded URL.
     return url;
   }
 
-private static String path(UrlResolver.Url baseUrl, UrlResolver.Url url) {
+private static String path123(UrlResolver.Url baseUrl, UrlResolver.Url url) {
 	final String basePath = baseUrl.path_;
 	String path = "";
 	if (basePath != null) {
