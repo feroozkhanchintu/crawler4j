@@ -57,19 +57,14 @@ public class RobotstxtParser {
         continue;
       }
 
-      if (line.matches(PATTERNS_USERAGENT)) {
-        String ua = line.substring(PATTERNS_USERAGENT_LENGTH).trim().toLowerCase();
-        inMatchingUserAgent = "*".equals(ua) || ua.contains(myUserAgent.toLowerCase());
+      inMatchingUserAgent = inMatchingUserAgent(myUserAgent, inMatchingUserAgent, line);
+	if (line.matches(PATTERNS_USERAGENT)) {
       } else if (line.matches(PATTERNS_DISALLOW)) {
         if (!inMatchingUserAgent) {
           continue;
         }
-        String path = line.substring(PATTERNS_DISALLOW_LENGTH).trim();
-        if (path.endsWith("*")) {
-          path = path.substring(0, path.length() - 1);
-        }
-        path = path.trim();
-        if (!path.isEmpty()) {
+        String path = path(line);
+		if (!path.isEmpty()) {
           if (directives == null) {
             directives = new HostDirectives();
           }
@@ -79,12 +74,8 @@ public class RobotstxtParser {
         if (!inMatchingUserAgent) {
           continue;
         }
-        String path = line.substring(PATTERNS_ALLOW_LENGTH).trim();
-        if (path.endsWith("*")) {
-          path = path.substring(0, path.length() - 1);
-        }
-        path = path.trim();
-        if (directives == null) {
+        String path = path1(line);
+		if (directives == null) {
           directives = new HostDirectives();
         }
         directives.addAllow(path);
@@ -93,4 +84,30 @@ public class RobotstxtParser {
 
     return directives;
   }
+
+private static boolean inMatchingUserAgent(String myUserAgent, boolean inMatchingUserAgent, String line) {
+	if (line.matches(PATTERNS_USERAGENT)) {
+		String ua = line.substring(PATTERNS_USERAGENT_LENGTH).trim().toLowerCase();
+		inMatchingUserAgent = "*".equals(ua) || ua.contains(myUserAgent.toLowerCase());
+	}
+	return inMatchingUserAgent;
+}
+
+private static String path1(String line) {
+	String path = line.substring(PATTERNS_ALLOW_LENGTH).trim();
+	if (path.endsWith("*")) {
+		path = path.substring(0, path.length() - 1);
+	}
+	path = path.trim();
+	return path;
+}
+
+private static String path(String line) {
+	String path = line.substring(PATTERNS_DISALLOW_LENGTH).trim();
+	if (path.endsWith("*")) {
+		path = path.substring(0, path.length() - 1);
+	}
+	path = path.trim();
+	return path;
+}
 }
